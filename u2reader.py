@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import time
 import datetime
 import sys
@@ -39,9 +40,9 @@ def usage():
 def parse_argv():
     parser = argparse.ArgumentParser(description='Snort Unified2 Log Parser')
     parser.add_argument('logfile')
-    parser.add_argument("-g", "--gen-map", type=str, default="gen-msg.map", help="A gen-msg.map")
-    parser.add_argument("-s", "--sid-map", type=str, default="sid-msg.map", help="A sid-msg.map")
-    parser.add_argument("-c", "--classfication", type=str, default="classification.config", help="A classification.config")
+    parser.add_argument("-g", "--gen-map", type=str, default="gen-msg.map", help="Snort gen-msg.map file. Default ./gen-msg.map")
+    parser.add_argument("-s", "--sid-map", type=str, default="sid-msg.map", help="Snort sid-msg.map file. Default ./sid-map.map")
+    parser.add_argument("-c", "--classfication", type=str, default="classification.config", help="Snort classification.config file. Default ./classification.config")
     parser.add_argument("-p", "--priority", type=int, default="0", help="Priority")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose mode")
     args = parser.parse_args()
@@ -67,7 +68,7 @@ def main():
     classmap = maps.ClassificationMap()
     classmap.load_from_file(open(args.classfication))
 
-    reader = unified2.SpoolEventReader("./", args.logfile)
+    reader = unified2.SpoolEventReader(os.path.split(args.logfile)[0], os.path.split(args.logfile)[1])
 
     for event in reader:
         event_time = epoch_to_datetime(event["event-second"])
@@ -94,7 +95,6 @@ def main():
 
         if args.priority <= priority:
             print("%d\t%s\t%s:%d => %s:%d\t%s\t%d" % (event_id, event_time, src_ip, src_port, dst_ip, dst_port, protocol, priority) )
-
             if args.verbose:
                 print("\t%s\t%s\t%s" % (sigmap_msg, sigmap_class, sigmap_ref))
                 print("\t%s\t%s" % (class_name, class_description))

@@ -8,8 +8,9 @@ Snort Utility Tools
 Snort and Suricata unified2 log file reader.
 
 ```
-$ ./u2reader.py merged.log --help
-usage: rd.py [-h] [-g GEN_MAP] [-s SID_MAP] [-c CLASSFICATION] [-p PRIORITY] [-v] logfile
+usage: u2reader.py [-h] [-g GEN_MAP] [-s SID_MAP] [-c CLASSFICATION]
+                   [-p PRIORITY] [-v]
+                   logfile
 
 Snort Unified2 Log Parser
 
@@ -18,45 +19,88 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -g GEN_MAP, --gen-map GEN_MAP		A gen-msg.map
-  -s SID_MAP, --sid-map SID_MAP		A sid-msg.map
-  -c CLASSFICATION, --classfication CLASSFICATION	A classification.config
-  -p PRIORITY, --priority PRIORITY	Priority
+  -g GEN_MAP, --gen-map GEN_MAP
+                        Snort gen-msg.map file. Default ./gen-msg.map
+  -s SID_MAP, --sid-map SID_MAP
+                        Snort sid-msg.map file. Default ./sid-map.map
+  -c CLASSFICATION, --classfication CLASSFICATION
+                        Snort classification.config file. Default ./classification.config
+  -p PRIORITY, --priority PRIORITY
+                        Priority
   -v, --verbose         Verbose mode
+
+```
+
+出力フォーマットは以下のようになっています.  
+-vオプションを使用しない場合
+```
+Event ID        Event Time      Source IP:Source Port => Destination IP:Destination Port        Protocol        Priority
+```
+
+-vオプションを使用した場合
+```
+Event ID        Event Time      Source IP:Source Port => Destination IP:Destination Port        Protocol        Priority
+Siganature Message      Signature Class Signature Reference(URL)
+Classification Name     Description     %s
 ```
 
 #### Example
-```
-$ ./u2reader.py merged.log
-16099   2015-11-16 20:28:09     178.XXX.XXX.196:60114 => 153.XXX.XXX.79:22        TCP     2
-16100   2015-11-16 20:29:10     178.XXX.XXX.196:60114 => 153.XXX.XXX.79:22        TCP     4
-16101   2015-11-16 20:29:51     212.XXX.XXX.243:5185 => 153.XXX.XXX.79:5060      UDP     2
-16102   2015-11-16 20:29:51     212.XXX.XXX.243:5185 => 153.XXX.XXX.79:5060      UDP     2
-16103   2015-11-16 20:30:12     178.XXX.XXX.196:60114 => 153.XXX.XXX.79:22        TCP     2
-16104   2015-11-16 20:31:13     178.XXX.XXX.196:60114 => 153.XXX.XXX.79:22        TCP     3
-16105   2015-11-16 20:32:14     178.XXX.XXX.196:60114 => 153.XXX.XXX.79:22        TCP     2
-```
 
 ```
-$ ./u2reader.py merged.log -p 3 -v
-10640   2015-11-09 11:26:54     173.XXX.XXX.237:61268 => 153.XXX.XXX.79:80      TCP     3
-        http_inspect: UNKNOWN METHOD    None    None
-        unknown Unknown Traffic
-16470   2015-11-17 10:50:09     75.XXX.XXX.105:58834 => 153.XXX.XXX.79:3389     TCP     3
-        ET SCAN Behavioral Unusually fast Terminal Server Traffic, Potential Scan or Infection (Inbound)        None    ['url,doc.emergingthreats.net/2001972']
-        network-scan    Detection of a Network Scan
-16497   2015-11-17 21:00:41     75.XXX.XXX.105:60990 => 153.XXX.XXX.79:3389     TCP     3
-        ET SCAN Behavioral Unusually fast Terminal Server Traffic, Potential Scan or Infection (Inbound)        None    ['url,doc.emergingthreats.net/2001972']
-        network-scan    Detection of a Network Scan
-16511   2015-11-18 07:11:39     75.XXX.XXX.105:61851 => 153.XXX.XXX.79:3389     TCP     3
-        ET SCAN Behavioral Unusually fast Terminal Server Traffic, Potential Scan or Infection (Inbound)        None    ['url,doc.emergingthreats.net/2001972']
-        network-scan    Detection of a Network Scan
-16532   2015-11-18 17:21:39     75.XXX.XXX.105:50989 => 153.XXX.XXX.79:3389     TCP     3
-        ET SCAN Behavioral Unusually fast Terminal Server Traffic, Potential Scan or Infection (Inbound)        None    ['url,doc.emergingthreats.net/2001972']
-        network-scan    Detection of a Network Scan
-16539   2015-11-19 03:41:59     75.XXX.XXX.105:58763 => 153.XXX.XXX.79:3389     TCP     3
-        ET SCAN Behavioral Unusually fast Terminal Server Traffic, Potential Scan or Infection (Inbound)        None    ['url,doc.emergingthreats.net/2001972']
-        network-scan    Detection of a Network Scan
+$ ./u2reader.py -g /etc/snort/gen-msg.map -s /etc/snort/sid-msg.map -c /etc/snort/classification.config samples/snort.unified2
+...
+10      2015-11-27 18:13:37     192.168.3.35:1034 => 195.2.253.92:80    TCP     1
+11      2015-11-27 18:13:37     192.168.3.35:1035 => 66.96.224.213:80   TCP     1
+12      2015-11-27 18:13:38     192.168.3.35:1036 => 195.2.253.92:80    TCP     1
+13      2015-11-27 18:13:38     192.168.3.35:1036 => 195.2.253.92:80    TCP     1
+14      2015-11-27 18:13:38     192.168.3.35:1036 => 195.2.253.92:80    TCP     1
+15      2015-11-27 18:13:38     192.168.3.35:1037 => 195.2.253.92:80    TCP     1
+16      2015-11-27 18:13:39     192.168.1.101:1037 => 65.32.5.111:53    UDP     3
+17      2015-11-27 18:13:43     192.168.10.127:1196 => 192.168.10.101:445       TCP     3
+18      2015-11-27 18:13:43     192.168.10.127:1196 => 192.168.10.101:445       TCP     3
+19      2015-11-27 18:13:44     192.168.10.128:1495 => 192.168.10.101:445       TCP     3
+20      2015-11-27 18:13:44     192.168.10.128:1495 => 192.168.10.101:445       TCP     3
+21      2015-11-27 18:13:44     192.168.10.128:1505 => 64.127.109.133:80        TCP     1
+22      2015-11-27 18:13:44     192.168.10.128:36012 => 72.20.34.145:6881       UDP     1
+23      2015-11-27 18:13:44     192.168.10.128:1536 => 192.168.10.101:445       TCP     3
+24      2015-11-27 18:13:44     192.168.10.128:1536 => 192.168.10.101:445       TCP     3
+25      2015-11-27 18:13:44     192.168.10.128:1547 => 192.168.10.101:445       TCP     3
+...
+```
+
+priorityが3より大きいalertを表示するには次のようにします.
+
+```
+$ python u2reader.py -g /etc/snort/gen-msg.map -s /etc/snort/sid-msg.map -c /etc/snort/classification.config -p 3 -v samples/snort.unified2
+...
+28      2015-11-27 18:13:45     192.168.10.126:1158 => 192.168.10.101:445       TCP     3
+        GPL NETBIOS SMB-DS IPC$ unicode share access    None    []
+        tcp-connection  A TCP connection was detected
+39      2015-11-27 18:13:47     192.168.10.129:1104 => 192.168.10.101:445       TCP     3
+        GPL NETBIOS SMB-DS Session Setup NTMLSSP unicode asn1 overflow attempt  None    ['url,www.microsoft.com/technet/security/bulletin/MS04-007.mspx', 'nessus,12065', 'nessus,12052', 'cve,200
+3-0818', 'bugtraq,9635', 'bugtraq,9633']
+        tcp-connection  A TCP connection was detected
+40      2015-11-27 18:13:47     192.168.10.129:1104 => 192.168.10.101:445       TCP     3
+        GPL NETBIOS SMB-DS IPC$ unicode share access    None    []
+        tcp-connection  A TCP connection was detected
+50      2015-11-27 18:13:49     192.168.10.120:63324 => 192.168.10.102:139      TCP     3
+        GPL NETBIOS SMB IPC$ unicode share access       None    []
+        tcp-connection  A TCP connection was detected
+51      2015-11-27 18:13:49     192.168.10.120:63378 => 192.168.10.102:139      TCP     3
+        GPL NETBIOS SMB IPC$ unicode share access       None    []
+        tcp-connection  A TCP connection was detected
+52      2015-11-27 18:13:49     192.168.10.125:1359 => 192.168.10.101:445       TCP     3
+        GPL NETBIOS SMB-DS Session Setup NTMLSSP unicode asn1 overflow attempt  None    ['url,www.microsoft.com/technet/security/bulletin/MS04-007.mspx', 'nessus,12065', 'nessus,12052', 'cve,200
+3-0818', 'bugtraq,9635', 'bugtraq,9633']
+        tcp-connection  A TCP connection was detected
+53      2015-11-27 18:13:49     192.168.10.125:1359 => 192.168.10.101:445       TCP     3
+        GPL NETBIOS SMB-DS IPC$ unicode share access    None    []
+        tcp-connection  A TCP connection was detected
+54      2015-11-27 18:13:49     192.168.10.127:1209 => 192.168.10.101:445       TCP     3
+        GPL NETBIOS SMB-DS Session Setup NTMLSSP unicode asn1 overflow attempt  None    ['url,www.microsoft.com/technet/security/bulletin/MS04-007.mspx', 'nessus,12065', 'nessus,12052', 'cve,200
+3-0818', 'bugtraq,9635', 'bugtraq,9633']
+        tcp-connection  A TCP connection was detected
+...
 ```
 
 ---
